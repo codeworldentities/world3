@@ -1,0 +1,64 @@
+# world3 — agent roles configuration
+#
+# Defines the distribution and behaviour profile of entities in the
+# simulation. When the file is present it is loaded by World at startup;
+# otherwise the hard-coded defaults in config.py apply.
+#
+# All fields are optional. Ratios are normalised automatically.
+
+version: 1
+
+population:
+  initial: 350
+  max: 1200
+  min: 100
+
+# Relative spawn ratios (summed and normalised).
+roles:
+  developer:
+    ratio: 0.55
+    traits:
+      aggression: [0.2, 0.6]
+      curiosity:  [0.4, 0.9]
+      sociability:[0.3, 0.8]
+      resilience: [0.4, 0.9]
+
+  senior_dev:
+    ratio: 0.08
+    traits:
+      aggression: [0.2, 0.5]
+      curiosity:  [0.5, 0.9]
+      sociability:[0.5, 0.9]
+      resilience: [0.6, 1.0]
+
+  intern:
+    ratio: 0.10
+    traits:
+      curiosity:  [0.6, 1.0]
+      resilience: [0.2, 0.6]
+
+  refactorer:
+    ratio: 0.10
+
+  ai_copilot:
+    ratio: 0.05
+    traits:
+      curiosity:  [0.7, 1.0]
+      sociability:[0.3, 0.6]
+
+  bug:
+    ratio: 0.12
+    traits:
+      aggression: [0.6, 1.0]
+
+# Soul grant rules — see systems/soul_system.py
+souls:
+  max: 30
+  grant_interval_ticks: 100
+  elder_age: 5000
+  # Any entity matching one of these rules can be granted a soul.
+  eligible:
+    - is_leader
+    - is_architect
+    - is_copilot
+    - is_elder

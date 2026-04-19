@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>world3 — Soul Gallery</title>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<style>
+  :root {
+    --bg: #0b0f17;
+    --panel: #131a26;
+    --accent: #7cc4ff;
+    --text: #e6edf3;
+    --muted: #7d8896;
+    --border: #22304a;
+    --gold: #ffd56b;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; font-family: -apple-system, Segoe UI, Roboto, sans-serif;
+    background: var(--bg); color: var(--text);
+  }
+  header {
+    padding: 24px 32px; border-bottom: 1px solid var(--border);
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  header h1 { margin: 0; font-size: 20px; }
+  header .sub { color: var(--muted); font-size: 13px; }
+  main { padding: 24px 32px; max-width: 1200px; margin: 0 auto; }
+  .grid { display: grid; grid-template-columns: 320px 1fr; gap: 24px; }
+  @media (max-width: 900px) { .grid { grid-template-columns: 1fr; } }
+  .list {
+    background: var(--panel); border: 1px solid var(--border);
+    border-radius: 8px; overflow: hidden; max-height: 75vh; overflow-y: auto;
+  }
+  .row {
+    padding: 12px 16px; border-bottom: 1px solid var(--border);
+    cursor: pointer; display: flex; justify-content: space-between;
+  }
+  .row:hover { background: #1a2233; }
+  .row.active { background: #1c2a42; border-left: 3px solid var(--accent); }
+  .row .name { font-weight: 600; }
+  .row .role { color: var(--muted); font-size: 12px; }
+  .row .meta { color: var(--muted); font-size: 11px; }
+  .row.dormant .name { color: var(--muted); font-style: italic; }
+  .detail {
+    background: var(--panel); border: 1px solid var(--border);
+    border-radius: 8px; padding: 20px; min-height: 400px;
+  }
+  .detail h2 { margin: 0 0 4px; }
+  .detail .role { color: var(--gold); font-size: 13px; margin-bottom: 16px; }
+  .detail .section { margin-top: 20px; }
+  .detail .section h3 {
+    font-size: 12px; text-transform: uppercase; letter-spacing: 1px;
+    color: var(--muted); margin: 0 0 8px;
+  }
+  .detail p { line-height: 1.5; }
+  .mem {
+    padding: 8px 12px; border-left: 2px solid var(--border);
+    margin-bottom: 6px; background: #0f1520; font-size: 13px;
+  }
+  .mem .tick { color: var(--muted); font-size: 11px; }
+  .mem .kind {
+    display: inline-block; padding: 1px 6px; border-radius: 3px;
+    background: #24334d; font-size: 10px; margin-right: 6px;
+    text-transform: uppercase;
+  }
+  .empty { color: var(--muted); text-align: center; padding: 60px 20px; }
+  .speak {
+    margin-top: 20px; display: flex; gap: 8px;
+  }
+  .speak input {
+    flex: 1; padding: 10px 12px; border-radius: 6px;
+    background: #0a0f18; color: var(--text); border: 1px solid var(--border);
+  }
+  .speak button {
+    padding: 10px 16px; border-radius: 6px; border: none;
+    background: var(--accent); color: #062036; font-weight: 600; cursor: pointer;
+  }
+  .speak button:disabled { opacity: .5; cursor: wait; }
+  .reply {
+    margin-top: 12px; padding: 12px; background: #0f1520;
+    border-left: 2px solid var(--gold); border-radius: 4px;
+  }
+  .badge {
+    display: inline-block; padding: 2px 8px; background: #2a3b5a;
+    border-radius: 10px; font-size: 11px; color: var(--text);
+    margin-left: 6px;
+  }
+</style>
+</head>
+<body>
+<header>
+  <div>
+    <h1>world3 — Soul Gallery</h1>
+    <div class="sub">Persistent personas living in the simulation</div>
+  </div>
+  <div class="sub" id="counter">loading…</div>
+</header>
+<main>
+  <div class="grid">
+    <div class="list" id="list"></div>
+    <div class="detail" id="detail">
+      <div class="empty">Select a soul to view their persona and memories.</div>
+    </div>
+  </div>
+</main>
+
+<script>
+const API = '';
+let currentId = null;
+let souls = [];
+
+async function fetchSouls() {
+  try {
+    const r = await fetch(API + '/api/souls');
+    const d = await r.json();
+    souls = d.souls || [];
+    document.getElementById('counter').textContent =
+      `${souls.length} soul${souls.length === 1 ? '' : 's'}`;
+    renderList();
+    if (currentId && !souls.find(s => s.id === currentId)) {
+      currentId = null;
+      renderDetailEmpty();
+    }
+  } catch (e) {
+    document.getElementById('counter').textContent = 'connection error';
+  }
+}
+
+function renderList() {
+  const el = document.getElementById('list');
+  if (!souls.length) {
+    el.innerHTML = '<div class="empty">No souls have awakened yet.<br>Run the simulation longer.</div>';
+    return;
+  }
+  el.innerHTML = souls.map(s => `
+    <div class="row ${s.id === currentId ? 'active' : ''} ${s.dormant ? 'dormant' : ''}"
+         onclick="selectSoul('${s.id}')">
+      <div>
+        <div class="name">${escapeHtml(s.name)}${s.openclaw_bound ? '<span class="badge">Claw</span>' : ''}</div>
+        <div class="role">${escapeHtml(s.role)}</div>
+      </div>
+      <div class="meta">
+        ${s.rebirth_count > 0 ? '♻ ' + s.rebirth_count + ' &nbsp;' : ''}
+        ${s.memories} mem
+      </div>
+    </div>
+  `).join('');
+}
+
+async function selectSoul(id) {
+  currentId = id;
+  renderList();
+  const el = document.getElementById('detail');
+  el.innerHTML = '<div class="empty">Loading…</div>';
+  const r = await fetch(API + '/api/soul/' + id);
+  if (!r.ok) {
+    el.innerHTML = '<div class="empty">Soul not found.</div>';
+    return;
+  }
+  const d = await r.json();
+  renderDetail(d.soul);
+}
+
+function renderDetail(s) {
+  const recent = (s.memory || []).slice(-10).reverse();
+  const imp = [...(s.memory || [])].sort((a,b) => (b.weight||0) - (a.weight||0)).slice(0,5);
+  const el = document.getElementById('detail');
+  el.innerHTML = `
+    <h2>${escapeHtml(s.name)}${s.openclaw_bound ? '<span class="badge">Claw-bound</span>' : ''}</h2>
+    <div class="role">${escapeHtml(s.role)} · born tick ${s.born_tick}
+      ${s.rebirth_count ? ' · rebirths: ' + s.rebirth_count : ''}
+      ${s.entity_id >= 0 ? ' · body #' + s.entity_id : ' · <em>dormant</em>'}
+    </div>
+
+    <div class="section">
+      <h3>Persona</h3>
+      <p>${escapeHtml(s.personality_summary || '(not yet generated)')}</p>
+    </div>
+
+    ${s.reflection ? `
+    <div class="section">
+      <h3>Reflection</h3>
+      <p>${escapeHtml(s.reflection)}</p>
+    </div>` : ''}
+
+    <div class="section">
+      <h3>Defining memories</h3>
+      ${imp.length ? imp.map(m => `
+        <div class="mem">
+          <span class="kind">${escapeHtml(m.kind)}</span>
+          ${escapeHtml(m.text)}
+          <div class="tick">t${m.tick} · weight ${(m.weight||0).toFixed(2)}</div>
+        </div>
+      `).join('') : '<p class="empty">none yet</p>'}
+    </div>
+
+    <div class="section">
+      <h3>Recent memories</h3>
+      ${recent.length ? recent.map(m => `
+        <div class="mem">
+          <span class="kind">${escapeHtml(m.kind)}</span>
+          ${escapeHtml(m.text)}
+          <div class="tick">t${m.tick} · weight ${(m.weight||0).toFixed(2)}</div>
+        </div>
+      `).join('') : '<p class="empty">none yet</p>'}
+    </div>
+
+    <div class="section">
+      <h3>Speak</h3>
+      <div class="speak">
+        <input id="speak-input" placeholder="Ask ${escapeHtml(s.name)} something…" onkeydown="if(event.key==='Enter')speak('${s.id}')" />
+        <button id="speak-btn" onclick="speak('${s.id}')">Send</button>
+      </div>
+      <div id="reply"></div>
+    </div>
+  `;
+}
+
+async function speak(id) {
+  const input = document.getElementById('speak-input');
+  const btn = document.getElementById('speak-btn');
+  const reply = document.getElementById('reply');
+  const question = input.value.trim();
+  if (!question) return;
+  btn.disabled = true; btn.textContent = '…';
+  reply.innerHTML = '';
+  try {
+    const r = await fetch(API + '/api/soul/' + id + '/speak', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({question}),
+    });
+    const d = await r.json();
+    if (d.text) {
+      reply.innerHTML = `<div class="reply"><strong>${escapeHtml(d.name)}:</strong> ${escapeHtml(d.text)}</div>`;
+      input.value = '';
+    } else {
+      reply.innerHTML = `<div class="reply" style="border-color:#b55">${escapeHtml(d.error || 'no reply')}</div>`;
+    }
+  } catch (e) {
+    reply.innerHTML = `<div class="reply" style="border-color:#b55">network error</div>`;
+  } finally {
+    btn.disabled = false; btn.textContent = 'Send';
+  }
+}
+
+function renderDetailEmpty() {
+  document.getElementById('detail').innerHTML =
+    '<div class="empty">Select a soul to view their persona and memories.</div>';
+}
+
+function escapeHtml(s) {
+  return String(s == null ? '' : s)
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+}
+
+fetchSouls();
+setInterval(fetchSouls, 5000);
+</script>
+</body>
+</html>

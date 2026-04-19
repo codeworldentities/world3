@@ -1,0 +1,31 @@
+services:
+  world3:
+    build: .
+    image: world3:latest
+    container_name: world3
+    ports:
+      - "5000:5000"
+    environment:
+      - LLM_ENABLED=${LLM_ENABLED:-1}
+      - LLM_BASE_URL=${LLM_BASE_URL:-http://ollama:11434}
+      - LLM_MODEL=${LLM_MODEL:-llama3.2:3b}
+      - NEO4J_ENABLED=0
+      - API_CORS_ORIGINS=${API_CORS_ORIGINS:-http://localhost:5173,http://127.0.0.1:5173}
+    volumes:
+      - ./saves:/app/saves
+      - ./output:/app/output
+    depends_on:
+      - ollama
+    restart: unless-stopped
+
+  ollama:
+    image: ollama/ollama:latest
+    container_name: world3-ollama
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama-data:/root/.ollama
+    restart: unless-stopped
+
+volumes:
+  ollama-data:

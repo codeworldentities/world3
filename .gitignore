@@ -1,0 +1,36 @@
+# Secrets / env
+.env
+.env.local
+*.env
+
+# Generated code output
+output/
+saves/
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Virtual envs
+venv/
+.venv/
+env/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+
+# Node (dashboard)
+dashboard/node_modules/
+dashboard/dist/
+dashboard/.vite/
+
+# OS
+.DS_Store
+Thumbs.db

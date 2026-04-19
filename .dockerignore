@@ -1,0 +1,20 @@
+# Docker ignore
+.git
+.github
+.venv
+venv
+env
+__pycache__
+*.pyc
+*.pyo
+.pytest_cache
+.mypy_cache
+.ruff_cache
+node_modules
+dashboard/node_modules
+dashboard/dist
+output
+saves
+.env
+.vscode
+.idea

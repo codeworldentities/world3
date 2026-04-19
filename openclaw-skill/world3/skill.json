@@ -1,0 +1,22 @@
+{
+  "name": "world3",
+  "version": "0.1.0",
+  "description": "Bridge between OpenClaw and the Code World v3 simulation. Lets Claw read the world state, inject memories into souls, and speak as a bound soul.",
+  "author": "world3",
+  "api_base_env": "WORLD3_API",
+  "api_base_default": "http://127.0.0.1:5000",
+  "entrypoints": {
+    "peek":  "peek.py",
+    "act":   "act.py",
+    "voice": "voice.py"
+  },
+  "capabilities": [
+    "read world status",
+    "list souls",
+    "read soul detail",
+    "inject memory into a soul",
+    "speak as a soul",
+    "bind / unbind a soul to openclaw"
+  ],
+  "notes": "All endpoints are on the local world3 Flask server. No secrets are transmitted. If WORLD3_API is not set, 127.0.0.1:5000 is used."
+}
