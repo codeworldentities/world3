@@ -1,5 +1,12 @@
 # world3 — AI Code Ecosystem
 
+> ## World 4 Update Notice
+> A new repository, **world4**, is now the main line for ongoing development and new features.
+> This **world3** repository is being prepared for update/migration notes and compatibility updates.
+>
+> Next active project repo: **https://github.com/codeworldentities/world4**
+> Stable/legacy line: **https://github.com/codeworldentities/world3**
+
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Python](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/)
 [![LLM](https://img.shields.io/badge/LLM-Ollama-informational)](https://ollama.ai/)
